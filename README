@@ -1,0 +1,43 @@
+Budget Fair Queueing (BFQ) I/O scheduler
+========================================
+
++ Author and current maintainer: Paolo Valente (<paolo.valente@unimore.it>)
++ Main website: <http://www.algogroup.unimo.it/people/paolo/disk_sched/>
+
+BFQ (Budget Fair Queueing) is a Proportional Share, or equivalently Fair Queueing, disk scheduler that allows each process/thread to be assigned a fraction of the disk throughput.
+
+Characteristics
+---------------
+
+It distributes the disk throughput to disk-bound processes as desired, even if it fluctuates, independently of the disk parameters and with any workload. BFQ does not provide this sector-domain fairness to processes issuing random requests, as this would easily cause the disk throughput to drop on one hand, and other processes to experience very high latencies on the other hand.
+For these processes BFQ switches to a more appropriate time-domain fairness, in which it is the disk time to be fairly distributed (basically the same service scheme of CFQ).
+
+BFQ guarantees to each disk request a tight delay with respect to the completion time that the request would enjoy in an ideal (unfeasible) perfectly-fair system. This is especially beneficial for soft real-time applications.
+
+BFQ exports a low_latency tunable. If enabled (currently the default), BFQ executes a special heuristics that automatically gives to interactive and soft real-time applications more than their fair share of the disk throughput, to reduce their latency. According to our results, for desktop or handheld usage, the system becomes virtually as responsive as if the disk was idle, whatever the actual disk load is.
+Soft real-time applications enjoy up to 3-time lower latencies than under CFQ and do not suffer from almost any glitch even in presence of heavy background workloads.
+
+Low-latency guarantees are preserved also in presence of NCQ.
+
+Optimized (from v4) to achieve a high throughput on SSDs without losing low-latency guarantees.
+
+According to our results, BFQ achieves up to 30% higher aggregate disk throughput than CFQ with most of the workloads considered, or the same throughput with the others.
+
+Differently from CFQ, BFQ uses (from v6) a unified mechanism (Early Queue Merge, EQM) to get a sequential read pattern, and hence a high throughput, with any set of processes performing interleaved I/O. EQM also preserves low latency.
+
+Systems adopting BFQ
+--------------------
+
+BFQ is the default disk scheduler in Sabayon, as well as in the Zen Kernel, the pf-kernel and several kernels for smartphones. 
+BFQ is instead optionally available in Arch Linux and Gentoo Linux. I record a few tens of downloads per day from people using other distributions as well. So far, the users that gave us feedback confirmed the expected latency drop and throughput boost in everyday use.
+
+-----------------------------------------------------------------------------------------------------------------
+
+For any suggestions or issues please feel free to post to the official mailing list currently at:
+
++ <bfq-iosched@googlegroups.com>
+
+or to write directly to:
+
++ <paolo.valente@unimore.it>, <mauro.andreolini@unimore.it>, <avanzini.arianna@gmail.com> or <frankieonuonga@gmail.com>
+
